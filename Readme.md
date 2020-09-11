@@ -1,0 +1,48 @@
+# Locale Bundle
+
+## Install
+    composer install kumulo/locale-bundle
+## Configuration
+In `config/packages/locale_bundle.yaml`
+
+Set the default locale :
+
+    locale_bundle:
+      default_locale: en
+Link it the Symfony default locale to the bundle :
+
+    locale_bundle:
+      default_locale: '%kernel.default_locale%'
+Manage the list of available locales :
+
+    locale_bundle:
+      available_locales: ['en', 'fr']
+
+## Locale Helpers :
+Locale helpers will automatically set the locale.
+There is 1 (to upgrade) kind of manager :
+
+**Header Manager**
+
+This manager will set the locale with `Accept-Language` headers.
+It's quite usefull when you want to make an translation for an API.
+
+**To come**
+- `UserLocaleHelper` to set locale with user preferences
+- `RouteLocaleHelper` to set locale with route `_locale` parameter
+## Add a new locale helper
+If you want to create your own locale helper, just create a new class and extend the `AbstractLocaleHelper`.
+
+`src/Helper/MyLocaleHelper.php`
+
+    <?php
+    namespace App\Helper;
+    
+    class MyLocaleHelper extends AbstractLocaleHelper {
+        public function getLocale(Request $request): ?string
+        {
+            $locale = "YOUR OWN LOGIC";
+            // ...
+            return $locale;
+        }
+    }
