@@ -1,0 +1,4 @@
+locale_bundle:
+  available_locales: ['en']
+  default_locale: en
+  helpers: []

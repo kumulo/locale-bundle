@@ -2,15 +2,17 @@
 
 namespace Kumulo\Bundle\LocaleBundle\Listener;
 
+use Kumulo\Bundle\LocaleBundle\Event\LocaleEvent;
 use Kumulo\Bundle\LocaleBundle\Service\LocalizerService;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 /**
  * Class LocaleSubscriber
@@ -18,33 +20,40 @@ use Symfony\Component\Security\Core\Security;
  */
 class LocaleSubscriber implements EventSubscriberInterface
 {
-    /** @var Security */
-    private $security;
+    /** @var TokenStorageInterface */
+    private $token;
     /** @var LocalizerService */
     private $localizer;
-    /** @var LoggerInterface */
-    private $logger;
-    /** @var array */
-    private $availableLocales;
+    /** @var EventDispatcherInterface */
+    private $dispatcher;
     /** @var string */
     private $defaultLocale;
+    /** @var array|null */
+    private $helpers;
     protected $currentLocale;
 
     /**
      * LocaleListener constructor.
-     * @param LoggerInterface $logger
-     * @param Security $security
+     * @param TokenStorageInterface $tokenStorage
      * @param LocalizerService $localizer
+     * @param EventDispatcherInterface $dispatcher
      * @param string $defaultLocale
-     * @param array $availableLocales
+     * @param array|null $helpers
      */
-    public function __construct(LoggerInterface $logger, Security $security, LocalizerService $localizer, $defaultLocale = 'en', $availableLocales = ['en'])
+    public function __construct(LoggerInterface $logger, TokenStorageInterface $tokenStorage, LocalizerService $localizer, EventDispatcherInterface $dispatcher)
     {
-        $this->security = $security;
+        $this->token = $tokenStorage;
         $this->localizer = $localizer;
-        $this->logger = $logger;
-        $this->defaultLocale = $defaultLocale;
-        $this->availableLocales = $availableLocales;
+        $this->dispatcher = $dispatcher;
+        $this->dispatcher->addSubscriber(new LoggerSubscriber($logger));
+    }
+
+    public function setDefaultLocale(string $locale) {
+        $this->defaultLocale = $locale;
+    }
+
+    public function setHelpers(?array $helpers) {
+        $this->helpers = $helpers ?? $this->localizer->getHelpers();
     }
 
     /**
@@ -70,25 +79,30 @@ class LocaleSubscriber implements EventSubscriberInterface
             return;
         }
 
-        if($this->security->getUser() && method_exists($this->security->getUser(), 'getLocale')) {
+        if($this->token->getToken() && method_exists($this->token->getToken()->getUser(), 'getLocale')) {
             throw new \BadMethodCallException('The method getLocale does not exist on user object');
         }
 
-        if ($this->security->getUser()) {
-            $request->setLocale($this->security->getUser()->getLocale());
-            $this->logger->info("Locale set by user to : " . $request->getLocale());
-        } elseif ($this->localizer->getLocaleInHeaders($this->availableLocales, $request)) {
-            $request->setLocale($this->localizer->getLocaleInHeaders($this->availableLocales, $request));
-            $this->logger->info("Locale set by headers to: " . $request->getLocale());
-        } else {
+        if($new_locale = $this->parseHelpers($request)) {
+            $request->setLocale($new_locale);
+        }
+        else {
             $request->setLocale($this->defaultLocale);
-            $this->logger->info("Locale set by default");
+            $this->dispatcher->dispatch(new LocaleEvent('default', $this->defaultLocale));
         }
 
         // Set currentLocale
         $this->currentLocale = $request->getLocale();
     }
-
+    private function parseHelpers(Request $request) {
+        foreach($this->helpers as $helper_name) {
+            $helper = $this->localizer->getHelper($helper_name);
+            if($locale = $helper->getLocale($request)) {
+                $this->dispatcher->dispatch(new LocaleEvent($helper->getServiceAlias(), $locale), LocaleEvent::NAME);
+                return $locale;
+            }
+        }
+    }
     /**
      * @param ResponseEvent $event
      * @return Response

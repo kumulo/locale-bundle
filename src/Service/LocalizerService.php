@@ -2,7 +2,7 @@
 
 namespace Kumulo\Bundle\LocaleBundle\Service;
 
-use Symfony\Component\HttpFoundation\Request;
+use Kumulo\Bundle\LocaleBundle\LocaleHelper\LocaleHelperInterface;
 
 /**
  * Class LocalizerService
@@ -10,26 +10,28 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class LocalizerService {
 
-    const ACCEPT_LANGUAGE_HEADER = "accept-language";
-    const RATIO_DELIMITER = ";q=";
+    private $helpers = [];
+
+    public function addHelper(LocaleHelperInterface $helper) {
+        $this->helpers[get_class($helper)] = $helper;
+    }
 
     /**
-     * @param array $availableLocales
-     * @param Request $request
-     * @return bool|string
+     * @return LocaleHelperInterface[]
      */
-    public function getLocaleInHeaders(array $availableLocales, Request $request) {
-        if($request->headers->has(self::ACCEPT_LANGUAGE_HEADER)) {
-            $header_languages = explode(',', $request->headers->get(self::ACCEPT_LANGUAGE_HEADER));
-            foreach ($header_languages as $header_language) {
-                if(strpos($header_language, self::RATIO_DELIMITER)) {
-                    list($language, $ratio) = explode(self::RATIO_DELIMITER, $header_language);
-                    if(in_array($language, $availableLocales)) return $language;
-                } else {
-                    if(in_array($header_language, $availableLocales)) return $header_language;
-                }
-            }
+    public function getHelpers() {
+        return $this->helpers;
+    }
+
+    /**
+     * @param $alias
+     * @return LocaleHelperInterface
+     */
+    public function getHelper($alias):LocaleHelperInterface {
+        if($alias instanceof LocaleHelperInterface) {return $alias;}
+        if(!$this->helpers[$alias] || !$this->helpers[$alias] instanceof LocaleHelperInterface) {
+            throw new \Exception("The request helper $alias is not available.");
         }
-        return false;
+        return $this->helpers[$alias];
     }
 }

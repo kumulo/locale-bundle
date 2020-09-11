@@ -2,6 +2,26 @@ services:
   Kumulo\Bundle\LocaleBundle\Service\LocalizerService:
     autowire: true
     autoconfigure: true
-  Kumulo\Bundle\LocaleBundle\Listener\LocaleSubscriber:
-    autoconfigure: true
+
+  Kumulo\Bundle\LocaleBundle\LocaleHelper\:
+    resource: '../../LocaleHelper'
     autowire: true
+    autoconfigure: true
+
+  Kumulo\Bundle\LocaleBundle\LocaleHelper\HeaderLocaleHelper:
+    autowire: true
+    arguments: ['%locale_bundle.available_locales%']
+    tags: ['locale_bundle.helpers']
+
+  kumulo.locale.localizer:
+    alias: 'Kumulo\Bundle\LocaleBundle\Service\LocalizerService'
+
+  Kumulo\Bundle\LocaleBundle\Listener\LoggerSubscriber:
+    autowire: true
+
+  Kumulo\Bundle\LocaleBundle\Listener\LocaleSubscriber:
+    autowire: true
+    autoconfigure: true
+    calls:
+      - ['setDefaultLocale', ['%locale_bundle.default_locale%']]
+      - ['setHelpers', ['%locale_bundle.helpers%']]
