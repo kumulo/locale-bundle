@@ -30,7 +30,7 @@ There is 1 (to upgrade) kind of manager :
 **Header Manager**
 
 This manager will set the locale with `Accept-Language` headers.
-It's quite usefull when you want to make an translation for an API.
+It's quite useful when you want to make a translation for an API.
 
 **To come**
 - `UserLocaleHelper` to set locale with user preferences
