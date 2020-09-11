@@ -7,6 +7,10 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
+/**
+ * Class LocaleBundleExtension
+ * @package Kumulo\Bundle\LocaleBundle
+ */
 class LocaleBundleExtension extends Extension {
     public function load(array $configs, ContainerBuilder $container)
     {

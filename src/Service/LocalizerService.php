@@ -6,7 +6,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class LocalizerService
- * @package Obblm\Core\Service
+ * @package Kumulo\Bundle\LocaleBundle
  */
 class LocalizerService {
 

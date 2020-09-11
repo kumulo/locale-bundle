@@ -12,6 +12,10 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Security\Core\Security;
 
+/**
+ * Class LocaleSubscriber
+ * @package Kumulo\Bundle\LocaleBundle
+ */
 class LocaleSubscriber implements EventSubscriberInterface
 {
     /** @var Security */

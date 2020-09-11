@@ -6,6 +6,10 @@ use Kumulo\Bundle\LocaleBundle\DependencyInjection\LocaleBundleExtension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
+/**
+ * Class LocaleBundle
+ * @package Kumulo\Bundle\LocaleBundle
+ */
 class LocaleBundle extends Bundle
 {
     public function getContainerExtension()
