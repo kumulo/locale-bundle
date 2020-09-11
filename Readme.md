@@ -1,23 +1,28 @@
 # Locale Bundle
 
 ## Install
-    composer install kumulo/locale-bundle
+```sh
+composer install kumulo/locale-bundle
+```
 ## Configuration
-In `config/packages/locale_bundle.yaml`
-
 Set the default locale :
-
-    locale_bundle:
-      default_locale: en
+```yaml
+# config/packages/locale_bundle.yaml
+locale_bundle:
+  default_locale: en
+```
 Link it the Symfony default locale to the bundle :
-
-    locale_bundle:
-      default_locale: '%kernel.default_locale%'
+```yaml
+# config/packages/locale_bundle.yaml
+locale_bundle:
+  default_locale: '%kernel.default_locale%'
+```
 Manage the list of available locales :
-
-    locale_bundle:
-      available_locales: ['en', 'fr']
-
+```yaml
+# config/packages/locale_bundle.yaml
+locale_bundle:
+  available_locales: ['en', 'fr']
+```
 ## Locale Helpers :
 Locale helpers will automatically set the locale.
 There is 1 (to upgrade) kind of manager :
@@ -32,17 +37,20 @@ It's quite usefull when you want to make an translation for an API.
 - `RouteLocaleHelper` to set locale with route `_locale` parameter
 ## Add a new locale helper
 If you want to create your own locale helper, just create a new class and extend the `AbstractLocaleHelper`.
+```php
+<?php
+// src/Helper/MyLocaleHelper.php
+namespace App\Helper;
 
-`src/Helper/MyLocaleHelper.php`
+use Kumulo\Bundle\LocaleBundle\LocaleHelper\AbstractLocaleHelper;
+use Symfony\Component\HttpFoundation\Request;
 
-    <?php
-    namespace App\Helper;
-    
-    class MyLocaleHelper extends AbstractLocaleHelper {
-        public function getLocale(Request $request): ?string
-        {
-            $locale = "YOUR OWN LOGIC";
-            // ...
-            return $locale;
-        }
+class MyLocaleHelper extends AbstractLocaleHelper {
+    public function getLocale(Request $request): ?string
+    {
+        $locale = "YOUR OWN LOGIC";
+        // ...
+        return $locale;
     }
+}
+```
