@@ -1,0 +1,7 @@
+services:
+  Kumulo\Bundle\LocaleBundle\Service\LocalizerService:
+    autowire: true
+    autoconfigure: true
+  Kumulo\Bundle\LocaleBundle\Listener\LocaleSubscriber:
+    autoconfigure: true
+    autowire: true
